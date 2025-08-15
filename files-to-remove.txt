@@ -1,0 +1,9 @@
+data/raw/Monday-WorkingHours.pcap_ISCX.csv
+data/raw/Tuesday-WorkingHours.pcap_ISCX.csv
+data/raw/Wednesday-workingHours.pcap_ISCX.csv
+data/raw/Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv
+data/raw/Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv
+data/raw/Friday-WorkingHours-Morning.pcap_ISCX.csv
+data/raw/Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv
+data/processed/cleaned_dataset.csv
+
