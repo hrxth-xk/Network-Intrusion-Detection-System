@@ -27,10 +27,20 @@ Network Intrusion Detection/
 ├─ requirements.txt        # Required Python packages
 └─ README.md               # Project documentation
 
+## Output Screenshots::
+
+![Dashboard](demoimg/1.png)
+![Upload Preview](demoimg/2.png)
+![Visualizations](demoimg/3.png)
+![Classification Report](demoimg/4.png)
+![Results](demoimg/5.png)
+![Prediction Results](demoimg/6.png)
+
+
 Installation & Setup:
 
 Clone the repository:
-git clone <your-repo-url>
+git clone <https://github.com/hrxth-xk/Network-Intrusion-Detection-System>
 cd Network Intrusion Detection
 
 Install required packages:
