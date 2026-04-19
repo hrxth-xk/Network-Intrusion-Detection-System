@@ -8,11 +8,11 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
 
 # 1. Load preprocessed dataset
-print("📂 Loading cleaned dataset...")
+print("Loading cleaned dataset...")
 df = pd.read_csv("data/processed/cleaned_dataset.csv")
 
 # 2. Handle infinite and missing values
-print("🧹 Cleaning infinite and missing values...")
+print(" Cleaning infinite and missing values...")
 df.replace([np.inf, -np.inf], np.nan, inplace=True)
 df.fillna(df.median(numeric_only=True), inplace=True)
 
@@ -24,24 +24,24 @@ X = df.drop(columns=["Label"])
 y = df["Label"]
 
 # 4. Train-Test Split
-print("✂ Splitting dataset into train and test...")
+print("Splitting dataset into train and test...")
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42, stratify=y
 )
 
 # 5. Train Random Forest model
-print("🚀 Training Random Forest model...")
+print("Training Random Forest model...")
 rf_model = RandomForestClassifier(
     n_estimators=100, random_state=42, n_jobs=-1
 )
 rf_model.fit(X_train, y_train)
 
 # 6. Predictions
-print("📊 Evaluating model...")
+print("Evaluating model...")
 y_pred = rf_model.predict(X_test)
 
 # 7. Metrics
-print("\n✅ Model Performance:")
+print("\Model Performance:")
 print(f"Accuracy: {accuracy_score(y_test, y_pred):.4f}")
 print("\nConfusion Matrix:")
 print(confusion_matrix(y_test, y_pred))
@@ -50,4 +50,4 @@ print(classification_report(y_test, y_pred))
 
 # 8. Save model
 joblib.dump(rf_model, "models/rf_model.pkl")
-print("💾 Model saved to models/rf_model.pkl")
+print("Model saved to models/rf_model.pkl")

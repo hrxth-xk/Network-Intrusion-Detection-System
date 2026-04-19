@@ -7,15 +7,96 @@ import os
 import altair as alt
 from sklearn.metrics import confusion_matrix, classification_report
 
-st.set_page_config(page_title="Network Intrusion Detection", layout="wide")
-st.title("Network Intrusion Detection System")
+st.set_page_config(page_title="Maldetect", layout="wide")
 
+# Modern Hero Section
 st.markdown("""
-Welcome! This app predicts whether network traffic is **Normal** or **Attack** using your trained models.
-- **Step 1:** Select a model (Random Forest or XGBoost)
-- **Step 2:** Upload a CSV file with network traffic data (optionally with true `Label` column for evaluation)
-- **Step 3:** See predictions, visualizations, and download results
-""")
+<style>
+.hero-container {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 3.5rem 4rem;
+    border-radius: 15px;
+    color: white;
+    text-align: center;
+    margin-bottom: 3rem;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.2);
+}
+.hero-title {
+    font-size: 2.8rem;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+    letter-spacing: -0.5px;
+}
+.hero-subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    margin-bottom: 1.2rem;
+    font-weight: 500;
+}
+.hero-description {
+    font-size: 1rem;
+    opacity: 0.9;
+    margin-bottom: 2.5rem;
+    line-height: 1.6;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.hero-steps {
+    display: flex;
+    justify-content: space-around;
+    gap: 2rem;
+    margin-top: 2.5rem;
+    flex-wrap: wrap;
+}
+.step {
+    flex: 1;
+    min-width: 160px;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+.step:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-5px);
+}
+.step-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+.step-text {
+    font-size: 1rem;
+    margin-top: 0.5rem;
+    font-weight: 500;
+}
+.spacer {
+    margin: 2.5rem 0;
+}
+</style>
+<div class="hero-container">
+    <div class="hero-title">MalDetect</div>
+    <div class="hero-subtitle">AI-Powered Threat Detection for Your Network Traffic</div>
+    <div class="hero-description">Upload your network data and get instant predictions on whether traffic is normal or malicious using advanced machine learning models.</div>
+    <div class="hero-steps">
+        <div class="step">
+            <span class="step-number">1</span>
+            <span class="step-text">Select Model</span>
+        </div>
+        <div class="step">
+            <span class="step-number">2</span>
+            <span class="step-text">Upload Data</span>
+        </div>
+        <div class="step">
+            <span class="step-number">3</span>
+            <span class="step-text">Get Insights</span>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 # Model selection
 model_option = st.selectbox(
@@ -35,6 +116,33 @@ if os.path.exists(model_path):
 else:
     st.warning(f"Model not found: {model_path}")
     st.stop()  # Stop execution until model exists
+
+st.markdown("---")
+
+# Sample file download section
+st.markdown("## Get Started with a Sample File")
+sample_file_path = "data/raw/test_sample.csv"
+if os.path.exists(sample_file_path):
+    try:
+        with open(sample_file_path, "r") as f:
+            sample_csv = f.read()
+        st.download_button(
+            label="📥 Download Sample CSV File",
+            data=sample_csv,
+            file_name="sample_network_traffic.csv",
+            mime="text/csv",
+            key="sample_download"
+        )
+        st.info("""
+        **Note:** This sample file contains real network traffic data with proper formatting.
+        - Download this file and upload it back to test the prediction system
+        - The sample already includes a `Label` column (0 = Normal, 1 = Attack) for demonstration
+        - Use this to understand the expected data format for your own datasets
+        """)
+    except Exception as e:
+        st.warning(f"Could not load sample file: {e}")
+else:
+    st.warning(f"Sample file not found: {sample_file_path}")
 
 st.markdown("---")
 
@@ -102,15 +210,24 @@ else:
         normal_count = pred_labels.count("Normal")
         attack_count = pred_labels.count("Attack")
 
+        st.markdown("<div class='spacer'></div>", unsafe_allow_html=True)
         st.markdown("## Prediction Summary")
-        st.write(f"Total rows: **{total}**")
-        st.write(f"Normal traffic: **{normal_count}**")
-        st.write(f"Attack traffic: **{attack_count}**")
-        st.write(f"Attack percentage: **{attack_count/total*100:.2f}%**")
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("Total Rows", total)
+        with col2:
+            st.metric("Normal Traffic", normal_count)
+        with col3:
+            st.metric("Attack Traffic", attack_count)
+        with col4:
+            st.metric("Attack %", f"{attack_count/total*100:.2f}%")
+        
+        st.info("**Summary Insight:** This section provides a quick overview of how many network flows were classified as normal vs. malicious. The attack percentage indicates the proportion of suspicious traffic detected.")
 
         # ---------------------------
         # VISUALIZATIONS
         # ---------------------------
+        st.markdown("<div class='spacer'></div>", unsafe_allow_html=True)
         st.markdown("## Visualizations")
 
         # 1) Bar chart (counts)
@@ -129,6 +246,7 @@ else:
             dy=-10  # Nudges text above bars
         ).encode(text='Count:Q')
         st.altair_chart((bar + text).configure_title(anchor="start"))
+        st.caption("**Bar Chart Explanation:** Displays the absolute count of predictions for each class. Bars represent how many network flows were classified as Normal (green) vs. Attack (blue). Use this to see the raw distribution across your dataset.")
 
         # 2) Donut / Pie chart
         pie = alt.Chart(summary_df).transform_calculate(
@@ -139,6 +257,7 @@ else:
             tooltip=["Label", "Count"]
         ).mark_arc(innerRadius=60).properties(width=300, height=300, title="Prediction Distribution")
         st.altair_chart(pie.configure_title(anchor="start"))
+        st.caption("**Donut Chart Explanation:** Shows the percentage distribution of predictions. Helpful to visualize the proportion of malicious traffic relative to total traffic. A higher attack percentage may indicate unusual network activity.")
 
         # 3) If true labels provided, show confusion matrix and classification report
         if "Label" in original_df.columns:
@@ -182,6 +301,11 @@ else:
             ).properties(width=400, height=300)
             cm_text = cm_chart.mark_text(baseline="middle", fontSize=14).encode(text="Count:Q")
             st.altair_chart(cm_chart + cm_text)
+            st.caption("**Confusion Matrix Explanation:** Shows model accuracy by comparing predicted vs. actual labels:")
+            st.caption("   - **True Negatives (TN):** Correctly identified normal traffic")
+            st.caption("   - **False Positives (FP):** Normal traffic incorrectly flagged as attack")
+            st.caption("   - **False Negatives (FN):** Attacks missed by the model")
+            st.caption("   - **True Positives (TP):** Correctly identified attack traffic")
 
             # Classification report
             st.markdown("### Classification Report")
@@ -194,6 +318,13 @@ else:
 
             # Show as a plain DataFrame (avoids stylist/formatter issues)
             st.dataframe(report_df, use_container_width=True)
+            st.caption(
+                "**Classification Report Explanation:**\n"
+                "- **Precision:** Of all predicted attacks, how many were correct\n"
+                "- **Recall:** Of all actual attacks, how many were caught\n"
+                "- **F1-Score:** Harmonic mean of precision and recall (higher is better)\n"
+                "- **Support:** Number of samples in each class"
+            )
 
         else:
             st.info("Upload a CSV with a `Label` column (ground truth) to see confusion matrix and classification metrics.")
@@ -212,6 +343,7 @@ else:
                         tooltip=['count()']
                     ).properties(width=500, height=250, title="Predicted Probability (positive class)")
                     st.altair_chart(hist)
+                    st.caption("**Probability Distribution Explanation:** Shows how confident the model is in its predictions. Peaks at 0 (confident normal) or 1 (confident attack) indicate high confidence predictions.")
                 else:
                     st.info("Model.predict_proba returned a single-column array; skipping probability histogram.")
             except Exception as e:
@@ -230,6 +362,7 @@ else:
                     tooltip=["feature", "importance"]
                 ).properties(width=600, height=400, title="Feature Importances (top 30)")
                 st.altair_chart(fi_chart)
+                st.caption("**Feature Importance Explanation:** Ranks which network features are most influential in detecting attacks. Higher values mean the feature has more impact on predictions. Understanding these helps identify key indicators of malicious activity.")
             except Exception as e:
                 st.warning(f"Could not compute feature importances: {e}")
 
@@ -238,6 +371,7 @@ else:
         # ---------------------------
 
         # Show predictions table and download button below visualizations
+        st.markdown("<div class='spacer'></div>", unsafe_allow_html=True)
         st.markdown("### Prediction Results")
         st.dataframe(df_result)
 
@@ -248,6 +382,87 @@ else:
             file_name="predictions.csv",
             mime="text/csv"
         )
+        
+        # Comprehensive Summary Section
+        st.markdown("<div class='spacer'></div>", unsafe_allow_html=True)
+        st.markdown("---")
+        st.markdown("<div class='spacer'></div>", unsafe_allow_html=True)
+        st.markdown("## Analysis Summary & Recommendations")
+        
+        summary_text = f"""
+        ### Dataset Overview
+        Your analysis processed **{total}** network flows with the following results:
+        - **Normal Traffic:** {normal_count} flows ({normal_count/total*100:.1f}%)
+        - **Attack Traffic:** {attack_count} flows ({attack_count/total*100:.1f}%)
+        
+        ### Key Insights from Your Data
+        
+        **1. Threat Level Assessment:**
+        """
+        
+        attack_percentage = attack_count/total*100
+        if attack_percentage < 5:
+            summary_text += "\n   🟢 **Low:** Your network shows minimal attack activity. Keep monitoring for any sudden changes."
+        elif attack_percentage < 20:
+            summary_text += "\n   🟡 **Moderate:** Detect some attack traffic. Investigate patterns and implement additional security measures."
+        else:
+            summary_text += "\n   🔴 **High:** Significant attack activity detected. Immediate investigation and remediation recommended."
+        
+        summary_text += f"""
+        
+        **2. Model Performance:**
+        """
+        
+        if "Label" in original_df.columns:
+            # Calculate metrics from confusion matrix
+            tn, fp, fn, tp = cm[0][0], cm[0][1], cm[1][0], cm[1][1]
+            accuracy = (tp + tn) / (tp + tn + fp + fn) if (tp + tn + fp + fn) > 0 else 0
+            
+            summary_text += f"\n   - Overall Accuracy: **{accuracy*100:.1f}%**"
+            summary_text += f"\n   - False Positive Rate: **{fp/(fp+tn)*100:.1f}%** (normal traffic flagged as attack)"
+            summary_text += f"\n   - False Negative Rate: **{fn/(fn+tp)*100:.1f}%** (attacks missed by model)"
+            
+            if accuracy >= 0.95:
+                summary_text += "\n   ✅ **Excellent** model performance - highly reliable predictions"
+            elif accuracy >= 0.85:
+                summary_text += "\n   ✓ **Good** model performance - suitable for deployment"
+            else:
+                summary_text += "\n   ⚠️ **Review** model performance - consider retraining or adjusting thresholds"
+        else:
+            summary_text += "\n   Upload data with a Label column to see detailed performance metrics."
+        
+        summary_text += f"""
+        
+        **3. Recommendations:**
+        """
+        
+        if attack_percentage > 20:
+            summary_text += "\n   - 🚨 Investigate the surge in attack traffic immediately"
+            summary_text += "\n   - Document attack patterns for forensics"
+        
+        summary_text += "\n   - Monitor feature importance to understand attack signatures"
+        summary_text += "\n   - Keep your model updated with new threat patterns"
+        summary_text += "\n   - Cross-reference with your security logs for validation"
+        
+        summary_text += f"""
+        
+        ### What the Visualizations Tell Us
+        
+        - **Prediction Summary (Metrics):** Quick health check of your network's threat level
+        - **Bar & Donut Charts:** Visual distribution to spot any anomalies in the data
+        - **Confusion Matrix:** Validates model reliability by comparing predictions to actual labels
+        - **Classification Report:** Statistical measures of precision, recall, and overall model quality
+        - **Probability Distribution:** Confidence levels of predictions (closer to 0 or 1 = higher confidence)
+        - **Feature Importance:** Identifies which network metrics are most indicative of attacks
+        
+        **Next Steps:**
+        1. Review flagged attack traffic in detail
+        2. Correlate with your security incidents
+        3. Use feature importance to understand attack patterns
+        4. Export results for further analysis in your SIEM or SOC tools
+        """
+        
+        st.info(summary_text)
 
     except ValueError as ve:
         st.error(f"Prediction failed: {ve}")

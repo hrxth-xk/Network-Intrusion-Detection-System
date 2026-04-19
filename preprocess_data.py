@@ -24,7 +24,7 @@ for file in all_files:
             break
     
     if label_col is None:
-        raise ValueError(f"❌ No label column found in {file}. Columns are: {df.columns.tolist()}")
+        raise ValueError(f"No label column found in {file}. Columns are: {df.columns.tolist()}")
     
     # Rename label column to 'Label' for consistency
     df.rename(columns={label_col: "Label"}, inplace=True)
@@ -42,8 +42,7 @@ print(f"Dataset shape before cleaning: {data.shape}")
 data = data.replace([pd.NA, float('inf'), float('-inf')], 0)
 
 print(f"Dataset shape after cleaning: {data.shape}")
-print("✅ Data preprocessing complete!")
-# After your cleaning code...
+print("Data preprocessing complete!")
 
 # Save cleaned dataset
 import os
